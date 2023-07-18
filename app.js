@@ -1,5 +1,6 @@
+require('dotenv').config();
 var app = require('./src/config/server');
 
-app.listen(3000, _ => {
-    console.log('server running');
+app.listen(process.env.PORT, _ => {
+    console.log('server running at', process.env.PORT);
 });
