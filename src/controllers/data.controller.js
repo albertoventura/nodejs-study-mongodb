@@ -7,7 +7,20 @@ const dataController = {
             const datas = await data.find();
             res.json(datas);
         }catch(e){
-            res.status(500).json({message: "find erro " + e});
+            res.status(500).json({message: "find error " + e});
+        }
+    },
+    getById: async (req, res ) => {
+        try {
+            const { id } = req.params;
+            await data.findById({_id: id})
+                .then( function (data){
+                    return res.status(200).json(data);
+                }).catch( e => {
+                return res.status(404).json(e);
+            });
+        } catch(e) {
+            res.status(500).json({message: "get by id error " + e});
         }
     },
     create: async (req, res) => {
@@ -18,43 +31,38 @@ const dataController = {
             await img.save();
             res.json(img);
         }catch(e){
-            res.status(500).json({message: "save erro"});
+            res.status(500).json({message: "create error "+e});
+        }
+    },
+    update: async (req, res) => {
+        try {
+            const { id } = req.params;
+            const { name } = req.body;
+            const file = req.file;
+            await data.findByIdAndUpdate({_id: id}, {name: name, file: file})
+                .then( function(data){
+                    return res.status(200).json(data);
+                })
+                .catch(function (err){
+                    return res.status(404).json(err);
+                });
+        }catch(e) {
+            res.status(500).json({message: "update error "+ e});
         }
     },
     delete: async (req, res) => {
         try{
             const id = req.params.id;
-            /* const img = await data.findById(id);
-            console.log('img', img); */
-            /* data.findByIdAndDelete({_id: id}, (err, data)=>{
-                if(err){
-                    return res.status(404).json("error 404");                    
-                }else{
-                    return res.status(200).json(data);
-                }
-            }); */
-            const f = await data.findByIdAndDelete({_id: id}).then(function (data){
+
+            await data.findByIdAndDelete({_id: id}).then(function (data){
                 console.log('data', data);
                 fs.unlinkSync(data.src);
                 return res.status(200).json(data);
             }).catch(function (err){
                 return res.status(404).json(err);  
             });
-            /* 
-            const img = await data.findById(id);
-            //res.json(img);            
-            if(!img){
-                return res.status(404).json({ message: "img n encontrada" });
-            }
-            console.log('img', img);
-            await img.remove();
-            console.log("@@@");
-            fs.unlinkSync(img.src);
-            console.log('img remov', img);
-            res.json({message: "img removida"}); 
-            */
         }catch(e){
-            res.status(500).json({message: "remove erro " + e});
+            res.status(500).json({message: "remove error" + e});
         }
     },
 }
