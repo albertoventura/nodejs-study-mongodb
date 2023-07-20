@@ -39,13 +39,28 @@ const dataController = {
             const { id } = req.params;
             const { name } = req.body;
             const file = req.file;
-            await data.findByIdAndUpdate({_id: id}, {name: name, file: file})
+            await data.findById({_id: id})
+                .then( data => {
+                    const oldData = data;
+                    data.name = name;
+                    if(file){
+                        fs.unlinkSync(oldData.src);
+                        data.src = file.path;
+                    }
+                    data.save();
+                    return res.status(200).json(data);
+                }).catch( e => {
+                    return res.status(404).json(err);
+            });
+            /* 
+            await data.findByIdAndUpdate({_id: id}, {name, src: file.path, }, {new: true})
                 .then( function(data){
                     return res.status(200).json(data);
                 })
                 .catch(function (err){
                     return res.status(404).json(err);
-                });
+                }); 
+            */
         }catch(e) {
             res.status(500).json({message: "update error "+ e});
         }
@@ -55,7 +70,6 @@ const dataController = {
             const id = req.params.id;
 
             await data.findByIdAndDelete({_id: id}).then(function (data){
-                console.log('data', data);
                 fs.unlinkSync(data.src);
                 return res.status(200).json(data);
             }).catch(function (err){
